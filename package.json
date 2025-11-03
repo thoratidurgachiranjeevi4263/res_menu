@@ -6,7 +6,7 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
-    "start": "node backend/server.js"
+    "build": "cd frontend && npm install && npm run build && cd .. && cd backend && npm install && cd ..",
+    "start": "cd backend && node server.js"
   }
 }
