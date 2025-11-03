@@ -10,7 +10,7 @@ const app = express();
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://restaurant-menu.onrender.com', 'https://restaurant-menu-xyz.onrender.com']
+    ? ['https://res-menu-6.onrender.com']
     : ['http://localhost:4200', 'http://localhost:3000'],
   credentials: true
 }));
