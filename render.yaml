@@ -2,9 +2,12 @@ services:
   - type: web
     name: restaurant-menu
     env: node
-    plan: free
-    buildCommand: npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend
-    startCommand: node backend/server.js
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: MONGODB_URI
+        fromDatabase:
+          name: restaurant-db
+          property: connectionString

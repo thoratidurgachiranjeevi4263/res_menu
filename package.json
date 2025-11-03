@@ -6,7 +6,17 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "build": "cd frontend && npm install && npm run build && cd .. && cd backend && npm install && cd ..",
-    "start": "cd backend && node server.js"
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm ci && npm run build",
+    "build:backend": "cd backend && npm ci",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "heroku-postbuild": "npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "mongoose": "^8.19.2",
+    "cors": "^2.8.5",
+    "body-parser": "^2.2.0"
   }
 }

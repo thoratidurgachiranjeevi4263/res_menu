@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -5,19 +6,41 @@ const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
-app.use(cors());
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://restaurant-menu.onrender.com', 'https://restaurant-menu-xyz.onrender.com']
+    : ['http://localhost:4200', 'http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from Angular build
-app.use(express.static(path.join(__dirname, '../frontend/dist/frontend/browser')));
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
-// Import routes
+// API routes FIRST
 const itemRoutes = require("./routes/item.routes");
 app.use("/api/items", itemRoutes);
 
-// Serve Angular app for all other routes
+// Serve static files from Angular build
+const frontendPath = path.join(__dirname, '../frontend/dist/frontend');
+const browserPath = path.join(frontendPath, 'browser');
+
+// Check if browser folder exists, fallback to main dist folder
+const staticPath = require('fs').existsSync(browserPath) ? browserPath : frontendPath;
+app.use(express.static(staticPath));
+
+// Serve Angular app for all non-API routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/frontend/browser/index.html'));
+  if (!req.url.startsWith('/api')) {
+    const indexPath = path.join(staticPath, 'index.html');
+    res.sendFile(indexPath);
+  }
 });
 
 // MongoDB Atlas connection
@@ -52,4 +75,17 @@ mongoose.connection.on('disconnected', () => {
 connectDB();
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  mongoose.connection.close(() => {
+    console.log('MongoDB connection closed');
+    process.exit(0);
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
