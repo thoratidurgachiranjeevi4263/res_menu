@@ -31,8 +31,7 @@ async function connectDB() {
     console.log('✅ MongoDB Atlas Connected Successfully');
   } catch (error) {
     console.error('❌ MongoDB Connection Failed:', error.message);
-    console.error('Full error:', error);
-    setTimeout(connectDB, 5000); // Retry after 5 seconds
+    process.exit(1);
   }
 }
 
